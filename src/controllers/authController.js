@@ -1,4 +1,4 @@
-const User = re1quire("../models/User");
+const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -25,3 +25,5 @@ const register = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+module.exports = { register };
