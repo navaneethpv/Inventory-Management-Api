@@ -2,6 +2,8 @@ const Order = require("../models/Order");
 const OrderItem = require("../models/OrderItem");
 const Product = require("../models/Product");
 
+
+// Create a new order
 exports.createOrder = async (req, res) => {
   try {
     const { items } = req.body;
@@ -45,6 +47,26 @@ exports.createOrder = async (req, res) => {
     res.status(201).json({
       success: true,
       order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// List all orders
+
+exports.getOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
     });
   } catch (error) {
     res.status(500).json({
