@@ -11,9 +11,9 @@ router.post('/create', authMiddleware, createOrder);
 router.get('/list', authMiddleware, getOrders);
 
 // Get order details by ID
-router.get('/details/:id', authMiddleware, getOrderById);
+router.get('/:id', authMiddleware, getOrderById);
 
 // Update order status
-router.put('/update-status/:id', authMiddleware, updateOrderStatus);
+router.put('/:id/status', authMiddleware, updateOrderStatus);
 
 module.exports = router;
