@@ -46,7 +46,7 @@ JWT_SECRET=mysecretkey123
 Clone the repository:
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/navaneethpv/Inventory-Management-Api.git
 ```
 
 Install dependencies with npm:
