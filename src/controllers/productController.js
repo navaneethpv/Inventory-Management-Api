@@ -30,16 +30,47 @@ exports.createProduct = async (req, res) => {
     } 
 }
 
-// List products 
+// List products with pagination, search and filter
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find()
+    const {
+      search,
+      category,
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    let query = {};
+
+    // Search by name
+    if (search) {
+      query.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // Filter by category
+    if (category) {
+      query.category = category;
+    }
+
+    const totalProducts =
+      await Product.countDocuments(query);
+
+    const products = await Product.find(query)
       .populate("category", "name")
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      count: products.length,
+      currentPage: Number(page),
+      totalPages: Math.ceil(
+        totalProducts / limit
+      ),
+      totalProducts,
       products,
     });
   } catch (error) {
