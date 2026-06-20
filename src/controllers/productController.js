@@ -1,0 +1,31 @@
+const Product = require('../models/Product');
+const Category = require('../models/Category');
+
+// Create a new product
+exports.createProduct = async (req, res) => {
+    try {
+        const {category, name, description, price, stockQuantity,status} = req.body;
+        if (price <= 0) {
+            return res.status(400).json({ success: false, message: 'Price must be greater than zero'});
+        }
+        if (stockQuantity < 0) {
+            return res.status(400).json({ success: false, message: 'Stock cannot be negative'});
+        }
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+            return res.status(404).json({ success: false, message: 'Category not found'});
+        }
+        const product = await Product.create({
+            category,
+            name,
+            description,
+            price,
+            stockQuantity,
+            status
+        });
+        res.status(201).json({ success: true, product });
+    }catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error while creating product', error: error.message
+        })
+    } 
+}
