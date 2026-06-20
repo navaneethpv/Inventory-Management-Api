@@ -105,3 +105,71 @@ exports.getOrderById = async (req, res) => {
     });
   }
 };
+
+// Update order status (e.g., pending, completed, canceled)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const allowedStatuses = ["Pending", "Confirmed", "Delivered", "Cancelled"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order status",
+      });
+    }
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (status === "Confirmed" && order.status !== "Confirmed") {
+      const orderItems = await OrderItem.find({
+        order: order._id,
+      });
+
+      for (const item of orderItems) {
+        const product = await Product.findById(item.product);
+
+        if (!product) {
+          return res.status(404).json({
+            success: false,
+            message: "Product not found",
+          });
+        }
+
+        if (product.stockQuantity < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: "Insufficient stock",
+          });
+        }
+
+        product.stockQuantity -= item.quantity;
+
+        await product.save();
+      }
+    }
+
+    order.status = status;
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
