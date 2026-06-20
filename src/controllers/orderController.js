@@ -74,3 +74,34 @@ exports.getOrders = async (req, res) => {
     });
   }
 };
+
+// Get order details by ID
+exports.getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "user",
+      "name email",
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    const orderItems = await OrderItem.find({
+      order: order._id,
+    }).populate("product", "name price");
+
+    res.status(200).json({
+      success: true,
+      order,
+      items: orderItems,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
